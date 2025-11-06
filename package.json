@@ -1,0 +1,12 @@
+{
+  "name": "scaled-value-calculator",
+  "version": "1.0.0",
+  "description": "4–20 mA Scaled Value Calculator",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^39.0.0"
+  }
+}
