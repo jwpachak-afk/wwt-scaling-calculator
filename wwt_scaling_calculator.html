@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wastewater 4–20 mA Scaling Calculator</title>
+<style>
+  body {
+    background:#121212;
+    color:#f2f2f2;
+    font-family:Arial,Helvetica,sans-serif;
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  }
+  .calc {
+    background:#1e1e1e;
+    border:2px solid #ffcc00;
+    border-radius:12px;
+    padding:20px 30px;
+    width:520px;
+    box-shadow:0 0 25px #000;
+  }
+  h1 {text-align:center;color:#ffcc00;font-size:1.6em;margin-bottom:10px;}
+  .row {display:flex;justify-content:space-between;align-items:center;margin:6px 0;}
+  label {flex:1;color:#ffcc00;font-weight:bold;font-size:0.95em;}
+  input,select {
+    flex:1;
+    background:#2b2b2b;
+    border:1px solid #ffcc00;
+    color:#fff;
+    padding:6px 8px;
+    border-radius:4px;
+    font-size:1em;
+    text-align:right;
+  }
+  button {
+    width:100%;
+    background:#ffcc00;
+    color:#000;
+    font-weight:bold;
+    border:none;
+    padding:10px;
+    border-radius:6px;
+    margin-top:12px;
+    cursor:pointer;
+    font-size:1em;
+  }
+  button:hover {background:#ffe066;}
+  .mode-switch {
+    text-align:center;
+    margin-bottom:10px;
+  }
+  .result {
+    text-align:center;
+    font-size:1.4em;
+    font-weight:bold;
+    color:#00ff88;
+    margin-top:15px;
+  }
+  footer {
+    text-align:center;
+    color:#888;
+    margin-top:10px;
+    font-size:0.8em;
+  }
+</style>
+</head>
+<body>
+  <div class="calc">
+    <h1>Wastewater 4–20 mA Scaling Calculator</h1>
+
+    <div class="mode-switch">
+      <label for="mode">Mode:</label>
+      <select id="mode" onchange="updateMode()">
+        <option value="maToEng">mA → Engineering Units</option>
+        <option value="engToMa">Engineering Units → mA</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label for="preset">Preset:</label>
+      <select id="preset" onchange="applyPreset()">
+        <option value="custom">Custom</option>
+        <option value="flow">Flow (0–1000 GPM)</option>
+        <option value="level">Level (0–15 ft)</option>
+        <option value="pressure">Pressure (0–100 psi)</option>
+        <option value="do">DO (0–20 mg/L)</option>
+        <option value="turbidity">Turbidity (0–500 NTU)</option>
+        <option value="ph">pH (0–14)</option>
+        <option value="percent">Percent Full (0–100 %)</option>
+      </select>
+    </div>
+
+    <div class="row"><label>Input Min (mA):</label><input id="inputMin" type="number" value="4" step="any"></div>
+    <div class="row"><label>Input Max (mA):</label><input id="inputMax" type="number" value="20" step="any"></div>
+    <div class="row"><label>Output Min:</label><input id="outputMin" type="number" value="0" step="any"></div>
+    <div class="row"><label>Output Max:</label><input id="outputMax" type="number" value="100" step="any"></div>
+    <div class="row" id="maRow"><label>mA Input Value:</label><input id="maValue" type="number" value="12" step="any"></div>
+    <div class="row" id="engRow" style="display:none;"><label>Measured Value:</label><input id="engValue" type="number" value="50" step="any"></div>
+
+    <button onclick="calculate()">Calculate</button>
+    <div class="result" id="result">Result: —</div>
+
+    <footer>Standard formula: (Value – Min) × ((OutMax–OutMin)/(InMax–InMin)) + OutMin</footer>
+  </div>
+
+<script>
+function applyPreset(){
+  const p=document.getElementById("preset").value;
+  const oMin=document.getElementById("outputMin");
+  const oMax=document.getElementById("outputMax");
+  switch(p){
+    case "flow":oMin.value=0;oMax.value=1000;break;
+    case "level":oMin.value=0;oMax.value=15;break;
+    case "pressure":oMin.value=0;oMax.value=100;break;
+    case "do":oMin.value=0;oMax.value=20;break;
+    case "turbidity":oMin.value=0;oMax.value=500;break;
+    case "ph":oMin.value=0;oMax.value=14;break;
+    case "percent":oMin.value=0;oMax.value=100;break;
+    default:break;
+  }
+}
+
+function updateMode(){
+  const mode=document.getElementById("mode").value;
+  document.getElementById("maRow").style.display=mode==="maToEng"?"flex":"none";
+  document.getElementById("engRow").style.display=mode==="engToMa"?"flex":"none";
+  document.getElementById("result").textContent="Result: —";
+}
+
+function calculate(){
+  const inputMin=parseFloat(document.getElementById("inputMin").value);
+  const inputMax=parseFloat(document.getElementById("inputMax").value);
+  const outputMin=parseFloat(document.getElementById("outputMin").value);
+  const outputMax=parseFloat(document.getElementById("outputMax").value);
+  const mode=document.getElementById("mode").value;
+
+  if(mode==="maToEng"){
+    const ma=parseFloat(document.getElementById("maValue").value);
+    const eng=(ma-inputMin)*((outputMax-outputMin)/(inputMax-inputMin))+outputMin;
+    document.getElementById("result").textContent=`Result: ${eng.toFixed(3)} units`;
+  } else {
+    const engVal=parseFloat(document.getElementById("engValue").value);
+    const ma=(engVal-outputMin)*((inputMax-inputMin)/(outputMax-outputMin))+inputMin;
+    document.getElementById("result").textContent=`Result: ${ma.toFixed(3)} mA`;
+  }
+}
+</script>
+</body>
+</html>
